@@ -57,13 +57,13 @@ object Binders {
   // ----------------------------------------------------
   // private
 
-  private[this] def throwExceptionIfNull[A <: AnyVal, B](f: B => A)(a: B): A = {
+  private[this] def throwExceptionIfNull[A <: Any, B](f: B => A)(a: B): A = {
     if (a == null) throw new UnexpectedNullValueException else f(a)
   }
 
-  private[this] def wrapCastOption[A <: AnyVal, B](o: B): Option[A] = Option(o).asInstanceOf[Option[A]]
+  private[this] def wrapCastOption[A <: Any, B](o: B): Option[A] = Option(o).asInstanceOf[Option[A]]
 
-  private[this] def unwrapCastOption[A <: AnyVal, B](o: Option[A]): B = o match {
+  private[this] def unwrapCastOption[A <: Any, B](o: Option[A]): B = o match {
     case Some(v) => v.asInstanceOf[B]
     case None => null.asInstanceOf[B]
   }
@@ -147,6 +147,8 @@ object Binders {
   val optionByte: Binders[Option[Byte]] = javaByte.xmap(wrapCastOption, unwrapCastOption)
 
   val string: Binders[String] = Binders(_ getString _)(_ getString _)(v => (ps, idx) => ps.setString(idx, v))
+  val optionString: Binders[Option[String]] = string.xmap(wrapCastOption, unwrapCastOption)
+
   val sqlArray: Binders[java.sql.Array] = Binders(_ getArray _)(_ getArray _)(v => (ps, idx) => ps.setArray(idx, v))
   val javaBigDecimal: Binders[java.math.BigDecimal] = Binders(_ getBigDecimal _)(_ getBigDecimal _)(v => (ps, idx) => ps.setBigDecimal(idx, v))
   val bigDecimal: Binders[BigDecimal] = javaBigDecimal.xmap(nullThrough(BigDecimal.apply), _.bigDecimal)
